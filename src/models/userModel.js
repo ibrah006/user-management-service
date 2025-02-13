@@ -1,18 +1,13 @@
-const User = require("../models/userModel");
-const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
 
-const registerUser = async (name, email, password) => {
-  const userExists = await User.findOne({ email });
-  if (userExists) throw new Error("User already exists");
+const UserSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ["student", "instructor", "admin"], default: "student" },
+  },
+  { timestamps: true }
+);
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({ name, email, password: hashedPassword });
-
-  return newUser;
-};
-
-const getUserByEmail = async (email) => {
-  return await User.findOne({ email });
-};
-
-module.exports = { registerUser, getUserByEmail };
+module.exports = mongoose.model("User", UserSchema);
